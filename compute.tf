@@ -64,12 +64,6 @@ resource "google_compute_instance" "tos_primary" {
     }
   }
 
-  attached_disk {
-    source      = google_compute_disk.etcd.id
-    device_name = "${var.vm_name}-etcd"
-    mode        = "READ_WRITE"
-  }
-
   network_interface {
     subnetwork = local.subnet_id
 
@@ -111,8 +105,32 @@ resource "google_compute_instance" "tos_primary" {
     type = "ANY_RESERVATION" # use any available reservation; no pre-purchased required
   }
 
+  # ── Startup Script (manual) ────────────────────────────────────────────────
+  # initialize.sh must be run manually on the VM after first boot to partition
+  # and format the etcd disk. It is NOT wired up as a metadata_startup_script.
+  # To run: copy initialize.sh to the VM, then execute it as root.
+  # To automate in future: metadata_startup_script = file("${path.module}/initialize.sh")
+
   depends_on = [
     google_project_service.compute,
     terraform_data.network_mode_validation,
   ]
+}
+
+# ── etcd Disk Attachment ───────────────────────────────────────────────────────
+# Attached as a SEPARATE resource (not inside google_compute_instance) so that
+# Terraform creates the VM first — giving the boot disk SCSI unit 0 (sda) —
+# and then hot-attaches the etcd disk, which lands at SCSI unit 1 (sdb).
+#
+# If attached_disk were declared inside the VM block, GCP would assign both
+# disks simultaneously and the etcd disk would claim sda instead of the boot disk.
+# The startup script's wait loop handles the brief gap between VM start and
+# this attachment completing.
+
+resource "google_compute_attached_disk" "etcd" {
+  disk        = google_compute_disk.etcd.id
+  instance    = google_compute_instance.tos_primary.id
+  device_name = "${var.vm_name}-etcd"
+  mode        = "READ_WRITE"
+  zone        = var.zone
 }
