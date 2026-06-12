@@ -1,0 +1,21 @@
+# Local variable values — contains sensitive data, never commit
+terraform.tfvars
+
+# Downloaded provider plugins
+.terraform/
+
+# State files — contain sensitive resource details
+*.tfstate
+*.tfstate.backup
+
+# Crash logs
+crash.log
+
+# Override files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# NOTE: .terraform.lock.hcl should be committed — it locks provider versions
+# for consistent runs across machines. Do NOT add it here.
