@@ -97,6 +97,7 @@ TOS_DIR=$(curl -sf -H "Metadata-Flavor: Google" "$METADATA/tos-package-dir" || t
 if [ -n "$TOS_URL" ]; then
     echo "Downloading TOS package from: $TOS_URL"
     echo "Destination directory: $TOS_DIR"
+    dnf install -y wget
     install -d -m 0777 "$TOS_DIR"
     wget -P "$TOS_DIR" "$TOS_URL"
     echo "Download complete: $(ls "$TOS_DIR")"
