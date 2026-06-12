@@ -105,11 +105,14 @@ resource "google_compute_instance" "tos_primary" {
     type = "ANY_RESERVATION" # use any available reservation; no pre-purchased required
   }
 
-  # ── Startup Script (manual) ────────────────────────────────────────────────
-  # initialize.sh must be run manually on the VM after first boot to partition
-  # and format the etcd disk. It is NOT wired up as a metadata_startup_script.
-  # To run: copy initialize.sh to the VM, then execute it as root.
-  # To automate in future: metadata_startup_script = file("${path.module}/initialize.sh")
+  # ── Startup Script ─────────────────────────────────────────────────────────
+  # GCP runs initialize.sh automatically at first boot as root via the metadata
+  # server. The script partitions and formats the etcd disk, writes fstab, and
+  # mounts it — no reboot required. A sentinel file prevents re-execution on
+  # subsequent boots.
+  # Monitor: gcloud compute instances get-serial-port-output <vm> --zone <zone>
+  # Full log on VM: /var/log/tufin-disk-setup.log
+  metadata_startup_script = file("${path.module}/initialize.sh")
 
   depends_on = [
     google_project_service.compute,
