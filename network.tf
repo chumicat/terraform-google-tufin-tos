@@ -1,36 +1,78 @@
+# ── Validation ────────────────────────────────────────────────────────────────
+# Catches the invalid combination create_vpc=true + create_subnet=false at
+# plan time before any resource is created or modified.
+
+resource "terraform_data" "network_mode_validation" {
+  lifecycle {
+    precondition {
+      condition     = !(var.create_vpc && !var.create_subnet)
+      error_message = "create_vpc = true requires create_subnet = true. A newly created VPC cannot contain a pre-existing subnet."
+    }
+  }
+}
+
+# ── Locals ─────────────────────────────────────────────────────────────────────
+# Resolves VPC and subnet references regardless of create/reference mode.
+# try() returns the first expression that does not error — when a resource has
+# count = 0 its index [0] errors, so try() falls through to the data source.
+
+locals {
+  vpc_name        = try(google_compute_network.vpc[0].name, data.google_compute_network.existing[0].name)
+  vpc_id          = try(google_compute_network.vpc[0].id, data.google_compute_network.existing[0].id)
+  subnet_id       = try(google_compute_subnetwork.main[0].id, data.google_compute_subnetwork.existing[0].id)
+  subnet_ip_range = try(google_compute_subnetwork.main[0].ip_cidr_range, data.google_compute_subnetwork.existing[0].ip_cidr_range)
+}
+
+# ── Data Sources (reference existing) ─────────────────────────────────────────
+# Created only when the corresponding create_ flag is false.
+# On destroy, data sources are never deleted — they are read-only references.
+
+data "google_compute_network" "existing" {
+  count = var.create_vpc ? 0 : 1
+  name  = var.vpc_name
+}
+
+data "google_compute_subnetwork" "existing" {
+  count  = var.create_subnet ? 0 : 1
+  name   = var.subnet_name
+  region = var.region
+}
+
 # ── VPC ────────────────────────────────────────────────────────────────────────
-# Custom-mode VPC — subnets are created explicitly below rather than
-# auto-generated per region, giving full control over CIDR ranges.
+# Created only when create_vpc = true.
+# Custom-mode VPC — subnets are defined explicitly, not auto-generated per region.
 
 resource "google_compute_network" "vpc" {
-  name                    = "tos-vpc"
+  count                   = var.create_vpc ? 1 : 0
+  name                    = var.vpc_name
   auto_create_subnetworks = false
   depends_on              = [google_project_service.compute]
 }
 
 # ── Main Subnet ────────────────────────────────────────────────────────────────
+# Created only when create_subnet = true.
 # The TOS VM is placed in this subnet.
-# CIDR is configurable via var.subnet_cidr (default 10.128.0.0/20).
-# Ensure it does not overlap with the proxy-only subnet or Kubernetes CIDRs.
+# CIDR is configurable via var.subnet_cidr — ignored when referencing existing.
 
 resource "google_compute_subnetwork" "main" {
-  name          = "tos-subnet"
+  count         = var.create_subnet ? 1 : 0
+  name          = var.subnet_name
   ip_cidr_range = var.subnet_cidr
   region        = var.region
-  network       = google_compute_network.vpc.id
+  network       = local.vpc_id
 }
 
 # ── Proxy-Only Subnet ──────────────────────────────────────────────────────────
-# Required by GCP for Internal TCP Proxy Load Balancers.
-# GCP allocates proxy instances from this subnet to front the LB — no VMs go here.
-# purpose = REGIONAL_MANAGED_PROXY marks it exclusively for LB use.
-# Minimum size is /26. CIDR is configurable via var.proxy_subnet_cidr.
+# Always created — this is a GCP-specific requirement for the Internal TCP Proxy
+# Load Balancer and will not pre-exist in any customer environment.
+# purpose = REGIONAL_MANAGED_PROXY marks it exclusively for LB proxy instances.
+# Minimum allowed size is /26. No VMs should be placed here.
 
 resource "google_compute_subnetwork" "proxy_only" {
   name          = "tos-proxy-subnet"
   ip_cidr_range = var.proxy_subnet_cidr
   region        = var.region
-  network       = google_compute_network.vpc.id
+  network       = local.vpc_id
   purpose       = "REGIONAL_MANAGED_PROXY"
   role          = "ACTIVE"
 }
@@ -44,7 +86,7 @@ resource "google_compute_subnetwork" "proxy_only" {
 
 resource "google_compute_firewall" "allow_ssh" {
   name    = "tos-allow-ssh"
-  network = google_compute_network.vpc.name
+  network = local.vpc_name
 
   allow {
     protocol = "tcp"
@@ -62,7 +104,7 @@ resource "google_compute_firewall" "allow_ssh" {
 
 resource "google_compute_firewall" "allow_nginx_ingress" {
   name    = "tos-allow-nginx-ingress"
-  network = google_compute_network.vpc.name
+  network = local.vpc_name
 
   allow {
     protocol = "tcp"
@@ -80,7 +122,7 @@ resource "google_compute_firewall" "allow_nginx_ingress" {
 
 resource "google_compute_firewall" "allow_proxy_to_vm" {
   name    = "tos-allow-proxy-to-vm"
-  network = google_compute_network.vpc.name
+  network = local.vpc_name
 
   allow {
     protocol = "tcp"
@@ -98,7 +140,7 @@ resource "google_compute_firewall" "allow_proxy_to_vm" {
 
 resource "google_compute_firewall" "allow_health_checks" {
   name    = "tos-allow-health-checks"
-  network = google_compute_network.vpc.name
+  network = local.vpc_name
 
   allow {
     protocol = "tcp"
@@ -117,7 +159,7 @@ resource "google_compute_firewall" "allow_health_checks" {
 resource "google_compute_firewall" "allow_syslog_tcp" {
   count   = var.enable_tcp_syslog ? 1 : 0
   name    = "tos-allow-syslog-tcp"
-  network = google_compute_network.vpc.name
+  network = local.vpc_name
 
   allow {
     protocol = "tcp"
@@ -137,7 +179,7 @@ resource "google_compute_firewall" "allow_syslog_tcp" {
 resource "google_compute_firewall" "allow_syslog_udp" {
   count   = var.enable_udp_syslog ? 1 : 0
   name    = "tos-allow-syslog-udp"
-  network = google_compute_network.vpc.name
+  network = local.vpc_name
 
   allow {
     protocol = "udp"

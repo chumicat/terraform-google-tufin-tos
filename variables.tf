@@ -19,6 +19,34 @@ variable "zone" {
 
 # ── Network ──────────────────────────────────────────────────────────────────
 
+variable "create_vpc" {
+  description = "true = create a new VPC; false = reference an existing VPC by vpc_name"
+  type        = bool
+  default     = true
+  # When true, create_subnet must also be true.
+  # A newly created VPC cannot contain a pre-existing subnet.
+  # This constraint is validated in network.tf.
+}
+
+variable "create_subnet" {
+  description = "true = create a new subnet; false = reference an existing subnet by subnet_name"
+  type        = bool
+  default     = true
+  # Cannot be false when create_vpc is true — validated in network.tf.
+}
+
+variable "vpc_name" {
+  description = "Name of the VPC to create (create_vpc=true) or reference (create_vpc=false)"
+  type        = string
+  default     = "tos-vpc"
+}
+
+variable "subnet_name" {
+  description = "Name of the subnet to create (create_subnet=true) or reference (create_subnet=false)"
+  type        = string
+  default     = "tos-subnet"
+}
+
 variable "subnet_cidr" {
   description = "CIDR for the main subnet where the TOS VM is placed"
   type        = string
