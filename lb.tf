@@ -35,7 +35,7 @@ resource "google_compute_instance_group" "tos" {
     for_each = var.enable_tcp_syslog ? [1] : []
     content {
       name = "syslog-tcp"
-      port = 31514
+      port = 32514   # unencrypted syslog — frontend 601 → nodePort 32514
     }
   }
 
@@ -43,7 +43,7 @@ resource "google_compute_instance_group" "tos" {
     for_each = var.enable_tcp_syslog ? [1] : []
     content {
       name = "syslog-tls"
-      port = 32514
+      port = 31514   # TLS syslog — frontend 6514 → nodePort 31514
     }
   }
 
@@ -92,6 +92,7 @@ resource "google_compute_region_backend_service" "https" {
     group          = google_compute_instance_group.tos.id
     balancing_mode               = "CONNECTION"
     max_connections_per_instance = 10000
+    capacity_scaler              = 1.0
   }
 }
 
@@ -131,6 +132,7 @@ resource "google_compute_region_backend_service" "syslog_tcp" {
     group          = google_compute_instance_group.tos.id
     balancing_mode               = "CONNECTION"
     max_connections_per_instance = 10000
+    capacity_scaler              = 1.0
   }
 }
 
@@ -174,6 +176,7 @@ resource "google_compute_region_backend_service" "syslog_tls" {
     group          = google_compute_instance_group.tos.id
     balancing_mode               = "CONNECTION"
     max_connections_per_instance = 10000
+    capacity_scaler              = 1.0
   }
 }
 
@@ -217,6 +220,7 @@ resource "google_compute_region_backend_service" "opm" {
     group          = google_compute_instance_group.tos.id
     balancing_mode               = "CONNECTION"
     max_connections_per_instance = 10000
+    capacity_scaler              = 1.0
   }
 }
 
