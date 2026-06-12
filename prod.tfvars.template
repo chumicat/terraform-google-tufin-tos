@@ -1,13 +1,20 @@
 # ── Required ──────────────────────────────────────────────────────────────────
 
-project_id    = ""          # GCP Project ID to deploy into
-admin_ip_cidr = ""          # Your admin IP for SSH, e.g. "1.2.3.4/32"
+project_id = ""             # GCP Project ID to deploy into
 
 # ── Optional overrides (defaults shown) ───────────────────────────────────────
 
 region  = "us-central1"
 zone    = "us-central1-a"
 vm_name = "tos-primary"
+
+# ── Network ───────────────────────────────────────────────────────────────────
+# Change only if these CIDRs conflict with your existing network ranges.
+# Both must be private (10.0.0.0/8, 172.16.0.0/12, or 192.168.0.0/16).
+# Must not overlap each other or Kubernetes pod CIDR (default: 10.244.0.0/16).
+
+subnet_cidr       = "10.128.0.0/20"   # Main subnet — TOS VM lives here
+proxy_subnet_cidr = "10.129.0.0/26"   # LB proxy-only subnet — do not place VMs here
 
 # ── Feature flags ─────────────────────────────────────────────────────────────
 

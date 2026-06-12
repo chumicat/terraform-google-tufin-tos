@@ -17,17 +17,31 @@ variable "zone" {
   default     = "us-central1-a"
 }
 
+# ── Network ──────────────────────────────────────────────────────────────────
+
+variable "subnet_cidr" {
+  description = "CIDR for the main subnet where the TOS VM is placed"
+  type        = string
+  default     = "10.128.0.0/20"
+  # Must be inside 10.0.0.0/8, 172.16.0.0/12, or 192.168.0.0/16.
+  # Must not overlap with proxy_subnet_cidr or Kubernetes CIDRs (default pod: 10.244.0.0/16).
+}
+
+variable "proxy_subnet_cidr" {
+  description = "CIDR for the proxy-only subnet required by the Internal TCP Proxy Load Balancer"
+  type        = string
+  default     = "10.129.0.0/26"
+  # /26 is the minimum allowed size for a proxy-only subnet.
+  # This subnet is reserved exclusively for GCP LB proxy instances — do not place VMs here.
+  # Must not overlap with subnet_cidr or Kubernetes CIDRs.
+}
+
 # ── Compute ──────────────────────────────────────────────────────────────────
 
 variable "vm_name" {
   description = "Name for the TOS primary data node VM"
   type        = string
   default     = "tos-primary"
-}
-
-variable "admin_ip_cidr" {
-  description = "Your admin IP in CIDR notation for SSH access (e.g. 1.2.3.4/32)"
-  type        = string
 }
 
 # ── Optional features ─────────────────────────────────────────────────────────
