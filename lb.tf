@@ -60,6 +60,11 @@ resource "google_compute_instance_group" "tos" {
 # TCP probe on nodePort 31443 — shared by all backend services.
 # GCP health checkers originate from 130.211.0.0/22 and 35.191.0.0/16;
 # the firewall rule allowing these is in network.tf (allow_health_checks).
+#
+# Backend balancing_mode note:
+# UTILIZATION is only valid for managed instance groups (MIGs) where GCP can
+# measure CPU. For an unmanaged instance group the correct mode is CONNECTION,
+# which requires a max_connections_per_instance capacity declaration.
 
 resource "google_compute_region_health_check" "tos" {
   name   = "tos-health-check"
@@ -85,7 +90,8 @@ resource "google_compute_region_backend_service" "https" {
 
   backend {
     group          = google_compute_instance_group.tos.id
-    balancing_mode = "UTILIZATION"
+    balancing_mode               = "CONNECTION"
+    max_connections_per_instance = 10000
   }
 }
 
@@ -123,7 +129,8 @@ resource "google_compute_region_backend_service" "syslog_tcp" {
 
   backend {
     group          = google_compute_instance_group.tos.id
-    balancing_mode = "UTILIZATION"
+    balancing_mode               = "CONNECTION"
+    max_connections_per_instance = 10000
   }
 }
 
@@ -165,7 +172,8 @@ resource "google_compute_region_backend_service" "syslog_tls" {
 
   backend {
     group          = google_compute_instance_group.tos.id
-    balancing_mode = "UTILIZATION"
+    balancing_mode               = "CONNECTION"
+    max_connections_per_instance = 10000
   }
 }
 
@@ -207,7 +215,8 @@ resource "google_compute_region_backend_service" "opm" {
 
   backend {
     group          = google_compute_instance_group.tos.id
-    balancing_mode = "UTILIZATION"
+    balancing_mode               = "CONNECTION"
+    max_connections_per_instance = 10000
   }
 }
 
