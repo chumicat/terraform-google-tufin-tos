@@ -115,6 +115,20 @@ variable "etcd_disk_size_gb" {
   # K3S etcd is sensitive to disk latency — keep this on a dedicated pd-ssd. min 50 GB
 }
 
+# ── TOS Package ──────────────────────────────────────────────────────────────
+
+variable "tos_package_url" {
+  description = "URL of the TOS installation package to pre-download. Leave empty to skip."
+  type        = string
+  default     = ""
+}
+
+variable "tos_package_dir" {
+  description = "Local directory on the VM where the TOS package is downloaded"
+  type        = string
+  default     = "/opt/upgrade"
+}
+
 # ── Optional features ─────────────────────────────────────────────────────────
 
 variable "enable_tcp_syslog" {

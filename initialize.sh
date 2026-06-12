@@ -85,6 +85,25 @@ mount /var/lib/rancher/k3s/server/db
 mount | grep "/var/lib/rancher/k3s/server/db"
 echo "etcd disk mounted successfully."
 
+# ── Download TOS package (optional) ─────────────────────────────────────────
+# Reads the package URL from GCP instance metadata. If the value is non-empty,
+# creates /opt/upgrade and downloads the file into it.
+# Set tos_package_url in terraform.tfvars (or prod.tfvars) to enable.
+
+METADATA="http://metadata.google.internal/computeMetadata/v1/instance/attributes"
+TOS_URL=$(curl -sf -H "Metadata-Flavor: Google" "$METADATA/tos-package-url" || true)
+TOS_DIR=$(curl -sf -H "Metadata-Flavor: Google" "$METADATA/tos-package-dir" || true)
+
+if [ -n "$TOS_URL" ]; then
+    echo "Downloading TOS package from: $TOS_URL"
+    echo "Destination directory: $TOS_DIR"
+    install -d -m 0777 "$TOS_DIR"
+    wget -P "$TOS_DIR" "$TOS_URL"
+    echo "Download complete: $(ls "$TOS_DIR")"
+else
+    echo "tos-package-url not set — skipping download."
+fi
+
 # ── Done ─────────────────────────────────────────────────────────────────────
 touch "$SENTINEL"
-echo "etcd disk setup complete. No reboot required."
+echo "Initialization complete. No reboot required."

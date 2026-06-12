@@ -41,6 +41,13 @@ etcd_disk_size_gb = 50
 os_image_family  = "rocky-linux-9-optimized-gcp"
 os_image_project = "rocky-linux-cloud"
 
+# ── TOS Package ───────────────────────────────────────────────────────────────
+# URL to pre-download the TOS installation package into /opt/upgrade at boot.
+# Leave empty to skip the download step.
+
+tos_package_url = ""          # e.g. "https://storage.googleapis.com/my-bucket/tos-aurora-R25-2.tar.gz"
+tos_package_dir = "/opt/upgrade"
+
 # ── Feature flags ─────────────────────────────────────────────────────────────
 
 enable_tcp_syslog  = false

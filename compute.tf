@@ -112,6 +112,13 @@ resource "google_compute_instance" "tos_primary" {
   # subsequent boots.
   # Monitor: gcloud compute instances get-serial-port-output <vm> --zone <zone>
   # Full log on VM: /var/log/tufin-disk-setup.log
+  metadata = {
+    # Read by initialize.sh at runtime via the GCP metadata server.
+    # Empty string = download step is skipped.
+    "tos-package-url" = var.tos_package_url
+    "tos-package-dir" = var.tos_package_dir
+  }
+
   metadata_startup_script = file("${path.module}/initialize.sh")
 
   depends_on = [
