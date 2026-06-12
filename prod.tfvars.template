@@ -6,7 +6,6 @@ project_id = ""             # GCP Project ID to deploy into
 
 region  = "us-central1"
 zone    = "us-central1-a"
-vm_name = "tos-primary"
 
 # ── Network ───────────────────────────────────────────────────────────────────
 # Valid combinations:
@@ -20,12 +19,27 @@ create_subnet = true
 vpc_name      = "tos-vpc"      # name to create or reference
 subnet_name   = "tos-subnet"   # name to create or reference
 
-# subnet_cidr is only used when create_subnet = true.
-# proxy_subnet_cidr is always used — proxy-only subnet is always created.
-# Both must be private and must not overlap each other or Kubernetes pod CIDR (default: 10.244.0.0/16).
+# subnet_cidr is only used when create_subnet = true; proxy_subnet_cidr is always used for create proxy-only subnet.
+# subnet_cidr size between /29 to /8; proxy_subnet_cidr allowed size between /26 to /8.
+# Both subnet_cidr and proxy_subnet_cidr must be inside 10.0.0.0/8, 172.16.0.0/12, or 192.168.0.0/16 (RFC-1918 private space).
+# Both subnet_cidr and proxy_subnet_cidr must not overlap with each other or Kubernetes CIDRs (default pod: 10.244.0.0/16).
 
 subnet_cidr       = "10.128.0.0/20"   # Main subnet — TOS VM lives here
 proxy_subnet_cidr = "10.129.0.0/26"   # LB proxy-only subnet — do not place VMs here
+
+# ── Compute ───────────────────────────────────────────────────────────────────
+# machine_type is assembled as: e2-custom-<vcpu>-<memory_mb>
+# TOS Aurora minimum: 20 vCPU / 80 GB RAM / 600 GB boot SSD / 50 GB etcd SSD
+
+vm_name           = "tos-primary"
+vcpu              = 20
+memory_mb         = 81920   # 80 GB
+boot_disk_size_gb = 650
+etcd_disk_size_gb = 50
+
+# OS image: resolved at apply time from the family (always uses latest)
+os_image_family  = "rocky-linux-9-optimized-gcp"
+os_image_project = "rocky-linux-cloud"
 
 # ── Feature flags ─────────────────────────────────────────────────────────────
 

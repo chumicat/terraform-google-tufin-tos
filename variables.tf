@@ -72,6 +72,49 @@ variable "vm_name" {
   default     = "tos-primary"
 }
 
+variable "vcpu" {
+  description = "Number of vCPUs for the TOS VM (assembles e2-custom-<vcpu>-<memory_mb>)"
+  type        = number
+  default     = 20
+  # TOS Aurora minimum: 20 vCPU / 80 GB RAM.
+  # Must be an even number; GCP rejects odd counts for e2-custom.
+}
+
+variable "memory_mb" {
+  description = "Memory in MB for the TOS VM (assembles e2-custom-<vcpu>-<memory_mb>)"
+  type        = number
+  default     = 81920 # 80 GB — TOS Aurora minimum
+  # Must be a multiple of 256 MB.
+}
+
+variable "os_image_family" {
+  description = "GCP image family for the TOS VM OS"
+  type        = string
+  default     = "rocky-linux-9-optimized-gcp"
+  # Resolves to the latest image in the family at apply time.
+  # Tufin requires Rocky Linux 9.7+.
+}
+
+variable "os_image_project" {
+  description = "GCP project that publishes the OS image family"
+  type        = string
+  default     = "rocky-linux-cloud"
+}
+
+variable "boot_disk_size_gb" {
+  description = "Size in GB of the boot disk (OS + TOS data)"
+  type        = number
+  default     = 650
+  # TOS Aurora minimum: 625 GB SSD. 650 GB for small Buffer. /opt: min 400 GB; /var: min 200 GB; /tmp: min 25 GB
+}
+
+variable "etcd_disk_size_gb" {
+  description = "Size in GB of the dedicated etcd SSD (separate from boot disk)"
+  type        = number
+  default     = 50
+  # K3S etcd is sensitive to disk latency — keep this on a dedicated pd-ssd. min 50 GB
+}
+
 # ── Optional features ─────────────────────────────────────────────────────────
 
 variable "enable_tcp_syslog" {
