@@ -1,0 +1,17 @@
+# ── Required ──────────────────────────────────────────────────────────────────
+
+project_id    = ""          # GCP Project ID to deploy into
+admin_ip_cidr = ""          # Your admin IP for SSH, e.g. "1.2.3.4/32"
+
+# ── Optional overrides (defaults shown) ───────────────────────────────────────
+
+region  = "us-central1"
+zone    = "us-central1-a"
+vm_name = "tos-primary"
+
+# ── Feature flags ─────────────────────────────────────────────────────────────
+
+enable_tcp_syslog  = false
+enable_opm         = false
+enable_udp_syslog  = false
+syslog_source_cidr = "0.0.0.0/0"   # Restrict when syslog flags are true
