@@ -249,7 +249,7 @@ if [ -n "$TOS_URL" ]; then
     chmod +x "$RUN_FILE"
     bash "$RUN_FILE"
     chmod +x /usr/local/bin/tos
-    echo "TOS CLI installed: $(tos --version 2>/dev/null || echo 'version check skipped')"
+    echo "TOS CLI installed at: $(ls -lh /usr/local/bin/tos)"
 else
     echo "tos-package-url not set — skipping TOS package download."
 fi
