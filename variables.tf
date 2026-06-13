@@ -129,6 +129,16 @@ variable "tos_package_dir" {
   default     = "/opt/upgrade"
 }
 
+# ── VM Initialization ────────────────────────────────────────────────────────
+
+variable "ntp_server" {
+  description = "NTP server hostname or IP for chrony. Leave empty to keep GCP default (metadata.google.internal)."
+  type        = string
+  default     = ""
+  # Examples: "time.google.com", "169.254.169.254" (GCP metadata), "ntp.corp.example.com"
+  # If set, prepended to /etc/chrony.conf so it takes priority over the GCP default.
+}
+
 # ── Optional features ─────────────────────────────────────────────────────────
 
 variable "enable_tcp_syslog" {

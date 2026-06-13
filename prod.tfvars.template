@@ -48,6 +48,12 @@ os_image_project = "rocky-linux-cloud"
 tos_package_url = ""          # e.g. "https://storage.googleapis.com/my-bucket/tos-aurora-R25-2.tar.gz"
 tos_package_dir = "/opt/upgrade"
 
+# ── VM Initialization ─────────────────────────────────────────────────────────
+# NTP server for chrony. Leave empty to keep the GCP default (metadata.google.internal).
+# Set to your corporate NTP server if the VM must not reach the public internet for time sync.
+
+ntp_server = ""               # e.g. "time.google.com" or "ntp.corp.example.com"
+
 # ── Feature flags ─────────────────────────────────────────────────────────────
 
 enable_tcp_syslog  = false

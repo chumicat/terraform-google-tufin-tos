@@ -106,17 +106,19 @@ resource "google_compute_instance" "tos_primary" {
   }
 
   # ── Startup Script ─────────────────────────────────────────────────────────
-  # GCP runs initialize.sh automatically at first boot as root via the metadata
-  # server. The script partitions and formats the etcd disk, writes fstab, and
-  # mounts it — no reboot required. A sentinel file prevents re-execution on
-  # subsequent boots.
+  # GCP runs initialize.sh automatically at each boot as root via the metadata
+  # server. Execution is split into two phases separated by a kernel-upgrade
+  # reboot. Sentinel files prevent re-running completed phases:
+  #   /etc/tufin-init-phase1-done — Phase 1 complete (pre-reboot)
+  #   /etc/tufin-init-done        — Phase 2 complete (post-reboot, fully ready)
   # Monitor: gcloud compute instances get-serial-port-output <vm> --zone <zone>
-  # Full log on VM: /var/log/tufin-disk-setup.log
+  # Full log on VM: /var/log/tufin-init.log
   metadata = {
-    # Read by initialize.sh at runtime via the GCP metadata server.
-    # Empty string = download step is skipped.
+    # All keys read by initialize.sh at runtime via the GCP metadata server.
+    # Empty string values cause the corresponding step to be skipped.
     "tos-package-url" = var.tos_package_url
     "tos-package-dir" = var.tos_package_dir
+    "ntp-server"      = var.ntp_server
   }
 
   metadata_startup_script = file("${path.module}/initialize.sh")
