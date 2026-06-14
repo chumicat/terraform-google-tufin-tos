@@ -126,7 +126,7 @@ variable "tos_package_url" {
 variable "tos_package_dir" {
   description = "Local directory on the VM where the TOS package is downloaded"
   type        = string
-  default     = "/opt/upgrade"
+  default     = "/opt/misc"
 }
 
 # ── VM Initialization ────────────────────────────────────────────────────────

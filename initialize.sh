@@ -7,7 +7,7 @@
 # TWO-PHASE EXECUTION (kernel upgrade requires a reboot before loading modules):
 #
 #   Phase 1 — runs on first boot:
-#     1. OS packages     — EPEL/ELRepo repos, wireguard-tools, rsync, tmux, wget
+#     1. OS packages     — EPEL/ELRepo repos, wireguard-tools, rsync, tmux, wget, bind-utils
 #     2. SELinux         — disable permanently (Tufin requirement)
 #     3. Firewall        — disable firewalld (TOS manages its own iptables)
 #     4. PATH            — add /usr/local/bin to root's .bashrc
@@ -77,7 +77,7 @@ if [ ! -f "$SENTINEL_PHASE1" ]; then
         https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm \
         https://www.elrepo.org/elrepo-release-9.el9.elrepo.noarch.rpm
 
-    dnf install -y wireguard-tools rsync tmux wget
+    dnf install -y wireguard-tools rsync tmux wget bind-utils
 
     # ── PART 2: SELinux ─────────────────────────────────────────────────────
 
