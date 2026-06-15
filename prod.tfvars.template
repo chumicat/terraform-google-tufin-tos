@@ -1,13 +1,13 @@
-# ── Required ──────────────────────────────────────────────────────────────────
+# -- Required ------------------------------------------------------------------
 
 project_id = ""             # GCP Project ID to deploy into
 
-# ── Optional overrides (defaults shown) ───────────────────────────────────────
+# -- Optional overrides (defaults shown) ---------------------------------------
 
 region  = "us-central1"
 zone    = "us-central1-a"
 
-# ── Network ───────────────────────────────────────────────────────────────────
+# -- Network -------------------------------------------------------------------
 # Valid combinations:
 #   create_vpc=true,  create_subnet=true  → create both (lab / greenfield)
 #   create_vpc=false, create_subnet=true  → existing VPC, new subnet
@@ -24,10 +24,10 @@ subnet_name   = "tos-subnet"   # name to create or reference
 # Both subnet_cidr and proxy_subnet_cidr must be inside 10.0.0.0/8, 172.16.0.0/12, or 192.168.0.0/16 (RFC-1918 private space).
 # Both subnet_cidr and proxy_subnet_cidr must not overlap with each other or Kubernetes CIDRs (default pod: 10.244.0.0/16).
 
-subnet_cidr       = "10.128.0.0/20"   # Main subnet — TOS VM lives here
-proxy_subnet_cidr = "10.129.0.0/26"   # LB proxy-only subnet — do not place VMs here
+subnet_cidr       = "10.128.0.0/20"   # Main subnet - TOS VM lives here
+proxy_subnet_cidr = "10.129.0.0/26"   # LB proxy-only subnet - do not place VMs here
 
-# ── Compute ───────────────────────────────────────────────────────────────────
+# -- Compute -------------------------------------------------------------------
 # machine_type is assembled as: e2-custom-<vcpu>-<memory_mb>
 # TOS Aurora minimum: 20 vCPU / 80 GB RAM / 600 GB boot SSD / 50 GB etcd SSD
 
@@ -41,20 +41,20 @@ etcd_disk_size_gb = 50
 os_image_family  = "rocky-linux-9-optimized-gcp"
 os_image_project = "rocky-linux-cloud"
 
-# ── TOS Package ───────────────────────────────────────────────────────────────
+# -- TOS Package ---------------------------------------------------------------
 # URL to pre-download the TOS installation package into /opt/misc at boot.
 # Leave empty to skip the download step.
 
 tos_package_url = ""          # e.g. "https://storage.googleapis.com/my-bucket/tos-aurora-R25-2.tar.gz"
 tos_package_dir = "/opt/misc"
 
-# ── VM Initialization ─────────────────────────────────────────────────────────
+# -- VM Initialization ---------------------------------------------------------
 # NTP server for chrony. Leave empty to keep the GCP default (metadata.google.internal).
 # Set to your corporate NTP server if the VM must not reach the public internet for time sync.
 
 ntp_server = ""               # e.g. "time.google.com" or "ntp.corp.example.com"
 
-# ── Feature flags ─────────────────────────────────────────────────────────────
+# -- Feature flags -------------------------------------------------------------
 
 enable_tcp_syslog  = false
 enable_opm         = false
