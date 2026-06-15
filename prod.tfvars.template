@@ -49,9 +49,10 @@ tos_package_url = ""          # e.g. "https://storage.googleapis.com/my-bucket/t
 tos_package_dir = "/opt/misc"
 
 # -- VM Initialization ---------------------------------------------------------
+# Timezone: IANA timezone name applied via timedatectl set-timezone.
 # NTP server for chrony. Leave empty to keep the GCP default (metadata.google.internal).
-# Set to your corporate NTP server if the VM must not reach the public internet for time sync.
 
+timezone   = "Asia/Taipei"    # e.g. "America/New_York", "Europe/London", "UTC"
 ntp_server = ""               # e.g. "time.google.com" or "ntp.corp.example.com"
 
 # -- Feature flags -------------------------------------------------------------

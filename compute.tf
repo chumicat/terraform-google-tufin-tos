@@ -118,6 +118,7 @@ resource "google_compute_instance" "tos_primary" {
     # Empty string values cause the corresponding step to be skipped.
     "tos-package-url" = var.tos_package_url
     "tos-package-dir" = var.tos_package_dir
+    "timezone"        = var.timezone
     "ntp-server"      = var.ntp_server
   }
 

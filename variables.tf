@@ -131,6 +131,14 @@ variable "tos_package_dir" {
 
 # ── VM Initialization ────────────────────────────────────────────────────────
 
+variable "timezone" {
+  description = "System timezone for the TOS VM, passed to timedatectl set-timezone"
+  type        = string
+  default     = "Asia/Taipei"
+  # Use IANA timezone names. List available zones with: timedatectl list-timezones
+  # Examples: "Asia/Taipei", "America/New_York", "Europe/London", "UTC"
+}
+
 variable "ntp_server" {
   description = "NTP server hostname or IP for chrony. Leave empty to keep GCP default (metadata.google.internal)."
   type        = string

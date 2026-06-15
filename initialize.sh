@@ -11,8 +11,9 @@
 #     2. SELinux         — disable permanently (Tufin requirement)
 #     3. Firewall        — disable firewalld (TOS manages its own iptables)
 #     4. PATH            — add /usr/local/bin to root's .bashrc
-#     5. NTP             — configure chrony with custom server (if ntp_server set)
-#     6. Kernel upgrade  — dnf upgrade, then reboot
+#     5. Timezone        — set system timezone via timedatectl
+#     6. NTP             — configure chrony with custom server (if ntp_server set)
+#     7. Kernel upgrade  — dnf upgrade, then reboot
 #
 #   Phase 2 — runs automatically after the reboot (new kernel active):
 #     7. Kernel modules  — write /etc/modules-load.d/tufin.conf and load now
@@ -59,6 +60,7 @@ METADATA="http://metadata.google.internal/computeMetadata/v1/instance/attributes
 TOS_URL=$(curl -sf -H "Metadata-Flavor: Google" "$METADATA/tos-package-url" || true)
 TOS_DIR=$(curl -sf -H "Metadata-Flavor: Google" "$METADATA/tos-package-dir" || true)
 NTP_SERVER=$(curl -sf -H "Metadata-Flavor: Google" "$METADATA/ntp-server" || true)
+TIMEZONE=$(curl -sf -H "Metadata-Flavor: Google" "$METADATA/timezone" || true)
 
 # ============================================================================
 # PHASE 1: OS setup — runs once on first boot, then reboots for new kernel
@@ -105,7 +107,15 @@ if [ ! -f "$SENTINEL_PHASE1" ]; then
         || echo 'export PATH="${PATH}:/usr/local/bin"' >> /root/.bashrc
     export PATH="${PATH}:/usr/local/bin"
 
-    # ── PART 5: NTP ─────────────────────────────────────────────────────────
+    # ── PART 5: TIMEZONE ────────────────────────────────────────────────────
+
+    echo "=== Configuring timezone ==="
+    # Falls back to Asia/Taipei if metadata key is empty (matches Terraform default).
+    TIMEZONE="${TIMEZONE:-Asia/Taipei}"
+    timedatectl set-timezone "$TIMEZONE"
+    echo "Timezone set to: $(timedatectl show -p Timezone --value)"
+
+    # ── PART 6: NTP ─────────────────────────────────────────────────────────
 
     if [ -n "$NTP_SERVER" ]; then
         echo "=== Configuring NTP: $NTP_SERVER ==="
@@ -122,7 +132,7 @@ if [ ! -f "$SENTINEL_PHASE1" ]; then
         echo "ntp-server not set — retaining GCP default NTP (metadata.google.internal)."
     fi
 
-    # ── PART 6: KERNEL UPGRADE ──────────────────────────────────────────────
+    # ── PART 7: KERNEL UPGRADE ──────────────────────────────────────────────
 
     echo "=== Upgrading kernel and all packages ==="
     # Tufin requires the kernel to be up-to-date before TOS installation.
