@@ -1,0 +1,4 @@
+# Enforce LF line endings for shell scripts regardless of the OS running git.
+# Prevents Windows CRLF from breaking bash scripts when Terraform reads them
+# with file() and passes them to GCP as the VM startup script.
+*.sh    text eol=lf

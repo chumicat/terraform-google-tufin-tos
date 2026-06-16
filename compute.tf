@@ -122,7 +122,10 @@ resource "google_compute_instance" "tos_primary" {
     "ntp-server"      = var.ntp_server
   }
 
-  metadata_startup_script = file("${path.module}/initialize.sh")
+  # replace() strips Windows CRLF line endings that occur when Terraform runs
+  # on Windows and file() reads initialize.sh with \r\n. Bash on Linux treats
+  # the \r as part of the command, breaking the shebang and every line.
+  metadata_startup_script = replace(file("${path.module}/initialize.sh"), "\r\n", "\n")
 
   depends_on = [
     google_project_service.compute,
