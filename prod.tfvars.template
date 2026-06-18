@@ -37,8 +37,10 @@ memory_mb         = 81920   # 80 GB
 boot_disk_size_gb = 650
 etcd_disk_size_gb = 50
 
-# OS image: resolved at apply time from the family (always uses latest)
-os_image_family  = "rocky-linux-9-optimized-gcp"
+# OS image: pinned to a specific version to avoid unintended OS upgrades.
+# Rocky 9.8 released 2026-05-28 is not yet validated with TOS Aurora — stay on 9.7.
+# To list available images: gcloud compute images list --project=rocky-linux-cloud --filter="family=rocky-linux-9-optimized-gcp"
+os_image_name    = "rocky-linux-9-optimized-gcp-v20260521"
 os_image_project = "rocky-linux-cloud"
 
 # -- TOS Package ---------------------------------------------------------------

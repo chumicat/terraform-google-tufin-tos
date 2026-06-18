@@ -87,12 +87,13 @@ variable "memory_mb" {
   # Must be a multiple of 256 MB.
 }
 
-variable "os_image_family" {
-  description = "GCP image family for the TOS VM OS"
+variable "os_image_name" {
+  description = "GCP image name to use for the TOS VM OS (pinned to a specific version)"
   type        = string
-  default     = "rocky-linux-9-optimized-gcp"
-  # Resolves to the latest image in the family at apply time.
-  # Tufin requires Rocky Linux 9.7+.
+  default     = "rocky-linux-9-optimized-gcp-v20260521"
+  # Pin to a specific image rather than a family to avoid unintended OS upgrades.
+  # Tufin requires Rocky Linux 9.7+; Rocky 9.8 released 2026-05-28 is not yet validated.
+  # To find available images: gcloud compute images list --project=rocky-linux-cloud --filter="family=rocky-linux-9-optimized-gcp"
 }
 
 variable "os_image_project" {

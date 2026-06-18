@@ -6,12 +6,12 @@
 data "google_project" "project" {}
 
 # ── OS Image ───────────────────────────────────────────────────────────────────
-# Resolves the latest image from the configured family rather than pinning to a
-# specific version. GCP returns the most recent published image in the family.
-# Default: rocky-linux-9-optimized-gcp in rocky-linux-cloud.
+# Pins to a specific image name rather than resolving the latest from a family.
+# Using a family would pick up Rocky 9.8+ automatically, which is not yet
+# validated with TOS Aurora. Pin to a known-good 9.7 image instead.
 
 data "google_compute_image" "tos" {
-  family  = var.os_image_family
+  name    = var.os_image_name
   project = var.os_image_project
 }
 
