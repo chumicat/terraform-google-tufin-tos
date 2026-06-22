@@ -6,6 +6,7 @@ This repo focus on the scenario of Standalone TOS (1 Data Node, No Worker Node, 
 ## Doc Reference
 - [Tufin - Prepare a GCP VM Instance](https://forum.tufin.com/support/kc/latest/Content/ST2/ManagingTOS/Prepare-GCP.htm)
 - [Tufin - Install TOS](https://forum.tufin.com/support/kc/aurora/Content/ST2/ManagingTOS/InstallTOS.htm)
+- [Tufin - Add GCP](https://forum.tufin.com/support/kc/latest/Content/Suite/Add_GCP.htm)
 
 # Prepare Google Cloud CLI
 
