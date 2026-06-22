@@ -483,7 +483,7 @@ awk '/^#/ {print; next} {print "\033[33m" $0 "\033[0m"}' ${TF_ARGS}
 
 <details><summary><Case 1> Powershell</summary>
 
-```bash
+```powershell
 # Config Variables
 $TF_ARGS = "prod.tfvars"
 
@@ -597,7 +597,7 @@ $lb_ip = $(terraform output -raw lb_ip)
 gcloud compute ssh tos-primary --zone=$ZONE --tunnel-through-iap --ssh-flag="-L 127.0.0.1:443:${lb_ip}:443" --ssh-flag="-N"
 
 # Open an SSH tunnel through the VM (without LB, direct VM Instance)
-gcloud compute ssh tos-primary --zone=$ZONE --tunnel-through-iap --ssh-flag="-L 127.0.0.1:443:127.0.0.1:443" --ssh-flag="-N"
+gcloud compute ssh tos-primary --zone=$ZONE --tunnel-through-iap --ssh-flag="-L 127.0.0.1:443:127.0.0.1:31443" --ssh-flag="-N"
 
 # Access
 https://localhost
@@ -615,17 +615,17 @@ terraform output lb_ip
 gcloud compute forwarding-rules list --regions us-central1
 
 # Open an SSH tunnel through the VM (with LB)
-lb_ip=$(terraform output lb_ip)
+lb_ip=$(terraform output -raw lb_ip)
 gcloud compute ssh tos-primary \
   --zone $ZONE \
   --tunnel-through-iap \
-  -- -L 8443:$lb_ip:443 -N
+  -- -L 443:$lb_ip:443 -N
 
 # Open an SSH tunnel through the VM (without LB, direct VM Instance)
 gcloud compute ssh tos-primary \
   --zone $ZONE \
   --tunnel-through-iap \
-  -- -L 8443:127.0.0.1:443 -N
+  -- -L 443:127.0.0.1:31443 -N
 
 # Access
 https://localhost:8443
